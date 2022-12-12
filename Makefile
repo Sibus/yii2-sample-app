@@ -5,7 +5,7 @@ define do_exec
 	docker-compose exec -it ${1}
 endef
 
-run: .env up composer/install yii/migrate/up
+run: memory .env up composer/install yii/migrate/up
 
 composer/install:
 	$(call do_exec, php composer install)
@@ -38,3 +38,11 @@ destroy:
 
 ps:
 	docker-compose ps
+
+memory:
+	@if [ "$$(sysctl -n vm.max_map_count)" -lt 262144 ]; then \
+		echo "The vm.max_map_count kernel setting must be set to at least 262144"; \
+		echo "Run"; \
+		echo "sudo sysctl -w vm.max_map_count=262144;"; \
+		exit 1; \
+	fi

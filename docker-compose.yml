@@ -29,6 +29,25 @@ services:
       interval: 1s
       start_period: 5s
 
+  elasticsearch:
+    image: elasticsearch:8.5.2
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    mem_limit: ${ES_MEM_LIMIT}
+
+  kibana:
+    depends_on:
+      - elasticsearch
+    image: kibana:8.5.2
+    volumes:
+      - kibanadata:/usr/share/kibana/data
+    ports:
+      - ${KIBANA_PORT:-127.0.0.1:5601}:5601
+    mem_limit: ${ES_MEM_LIMIT}
+
   swagger-ui:
     image: swaggerapi/swagger-ui
     environment:
@@ -42,4 +61,8 @@ services:
 
 volumes:
   pgdata:
+    driver: local
+  esdata:
+    driver: local
+  kibanadata:
     driver: local
