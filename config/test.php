@@ -5,6 +5,9 @@ $common = require __DIR__ . '/common.php';
 $config = [
     'id' => 'basic-tests',
     'basePath' => dirname(__DIR__),
+    'bootstrap' => [
+        \app\bootstrap\SetUp::class,
+    ],
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
