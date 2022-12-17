@@ -49,6 +49,11 @@ $config = [
             'enableStrictParsing' => true,
             'showScriptName' => false,
             'rules' => [
+                '' => 'site/index',
+                'GET books' => 'book/index',
+                'POST books' => 'book/create',
+                'GET books/<id:\d+>' => 'book/view',
+                'POST books/<id:\d+>/rating' => 'book/rate',
             ],
         ],
     ],
