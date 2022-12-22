@@ -29,6 +29,17 @@ services:
       interval: 1s
       start_period: 5s
 
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    environment:
+       # SWAGGER_JSON_URL: ${SWAGGER_UI_URL}
+       URL: ${SWAGGER_UI_URL}
+       # URLS: "[
+       #   { url: 'https://petstore.swagger.io/v2/swagger.json', name: 'Petstore' }
+       # ]"
+    ports:
+      - "127.0.0.1:81:8080"
+
 volumes:
   pgdata:
     driver: local
