@@ -29,6 +29,9 @@ $config = [
             'identityClass' => 'app\models\User',
             'enableSession' => false,
         ],
+        'errorHandler' => [
+            'class' => \app\framework\ErrorHandler::class,
+        ],
         'mailer' => [
             'class' => \yii\symfonymailer\Mailer::class,
             'viewPath' => '@app/mail',

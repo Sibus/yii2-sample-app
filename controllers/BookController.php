@@ -9,11 +9,8 @@ use app\forms\BookForm;
 use app\forms\EstimateForm;
 use app\forms\SearchForm;
 use app\services\BookService;
-use app\services\EntityNotFoundException;
 use OpenApi\Attributes as OA;
 use Yii;
-use yii\web\NotFoundHttpException;
-use yii\web\UnprocessableEntityHttpException;
 
 class BookController extends Controller
 {
@@ -59,11 +56,7 @@ class BookController extends Controller
     #[OA\Response(response: 404, description: "Book is not found")]
     public function actionView($id): Book
     {
-        try {
-            return $this->service->find($id);
-        } catch (EntityNotFoundException $e) {
-            throw new NotFoundHttpException($e->getMessage(), previous: $e);
-        }
+        return $this->service->find($id);
     }
 
     #[OA\Post(path: "/books")]
@@ -76,13 +69,8 @@ class BookController extends Controller
     public function actionCreate()
     {
         $form = new BookForm();
-        try {
-            if ($form->load(Yii::$app->request->post(), '') && $form->validate()) {
-                return $this->service->create($form);
-            }
-        } catch (\DomainException $e) {
-            Yii::$app->errorHandler->logException($e);
-            throw new \yii\web\UnprocessableEntityHttpException($e->getMessage(), previous: $e);
+        if ($form->load(Yii::$app->request->post(), '') && $form->validate()) {
+            return $this->service->create($form);
         }
         return $form;
     }
@@ -99,15 +87,9 @@ class BookController extends Controller
     public function actionRate($id)
     {
         $form = new EstimateForm();
-        try {
-            if ($form->load(Yii::$app->request->post(), '') && $form->validate()) {
-                return $this->service->rate((int) $id, $form);
-            }
-        } catch (\DomainException $e) {
-            Yii::$app->errorHandler->logException($e);
-            throw new \yii\web\UnprocessableEntityHttpException($e->getMessage(), previous: $e);
+        if ($form->load(Yii::$app->request->post(), '') && $form->validate()) {
+            return $this->service->rate((int) $id, $form);
         }
-
         return $form;
     }
 }
