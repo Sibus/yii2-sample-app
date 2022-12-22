@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace app\entities;
 
+use OpenApi\Attributes as OA;
 use yii\db\ActiveRecord;
 
 /**
@@ -17,6 +18,18 @@ use yii\db\ActiveRecord;
  *
  * @property Estimate[] $estimates
  */
+#[OA\Schema(schema: "BookList", type: "array", items: new OA\Items(ref: "#/components/schemas/Book"))]
+#[OA\Schema(
+    properties: [
+        new OA\Property(property: "id", type: "integer", example: 1),
+        new OA\Property(property: "name", type: "string", maxLength: 255, example: "Улитка на склоне"),
+        new OA\Property(property: "author", type: "string", maxLength: 255, example: "Аркадий и Борис Стругацкие"),
+        new OA\Property(property: "rating", type: "float", maximum: 5, minimum: 1, example: 4.5, nullable: true),
+        new OA\Property(property: "genres", type: "array", items: new OA\Items(type: "string"), example: ["Фантастика", "Приключение"]),
+        new OA\Property(property: "created_at", type: "integer", example: 1671442737),
+        new OA\Property(property: "updated_at", type: "integer", example: null, nullable: true),
+    ],
+)]
 class Book extends ActiveRecord
 {
     /**

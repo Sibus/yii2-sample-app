@@ -10,6 +10,7 @@ use app\forms\EstimateForm;
 use app\forms\SearchForm;
 use app\services\BookService;
 use app\services\EntityNotFoundException;
+use OpenApi\Attributes as OA;
 use Yii;
 use yii\web\NotFoundHttpException;
 use yii\web\UnprocessableEntityHttpException;
@@ -31,6 +32,17 @@ class BookController extends Controller
         return [];
     }
 
+    #[OA\Get(path: "/books")]
+    #[OA\Parameter(name: "sort", in: "query", schema: new OA\Schema(type: "string", example: "rating"))]
+    #[OA\Parameter(name: "search", in: "query", schema: new OA\Schema(type: "string", example: "Улитка"))]
+    #[OA\Parameter(name: "page", in: "query", schema: new OA\Schema(type: "integer", example: 1))]
+    #[OA\Parameter(name: "pageSize", in: "query", schema: new OA\Schema(type: "integer", example: 5))]
+    #[OA\Response(response: 200, description: "Success", content: new OA\JsonContent(properties: [
+        new OA\Property("items", ref: "#/components/schemas/BookList"),
+        new OA\Property("_links", ref: "#/components/schemas/Links"),
+        new OA\Property("_meta", ref: "#/components/schemas/Meta")
+    ]))]
+    #[OA\Response(response: 422, description: "Data Validation Failed", content: new OA\JsonContent(ref: "#/components/schemas/ErrorList"))]
     public function actionIndex()
     {
         $form = new SearchForm();
@@ -41,6 +53,10 @@ class BookController extends Controller
         return $form;
     }
 
+    #[OA\Get(path: "/books/{id}")]
+    #[OA\PathParameter(name: "id", required: true, schema: new OA\Schema(ref: "#/components/schemas/Book/properties/id"))]
+    #[OA\Response(response: 200, description: "Success", content: new OA\JsonContent(ref: "#/components/schemas/Book"))]
+    #[OA\Response(response: 404, description: "Book is not found")]
     public function actionView($id): Book
     {
         try {
@@ -50,6 +66,13 @@ class BookController extends Controller
         }
     }
 
+    #[OA\Post(path: "/books")]
+    #[OA\RequestBody(content: new OA\JsonContent(ref: "#/components/schemas/BookForm"))]
+    #[OA\Response(response: 200, description: "Success")]
+    #[OA\Response(response: 422, description: "Data Validation Failed", content: new OA\JsonContent(oneOf: [
+        new OA\Schema(ref: "#/components/schemas/ErrorList"),
+        new OA\Schema(ref: "#/components/schemas/Exception"),
+    ]))]
     public function actionCreate()
     {
         $form = new BookForm();
@@ -64,6 +87,15 @@ class BookController extends Controller
         return $form;
     }
 
+    #[OA\Post(path: "/books/{id}/rating")]
+    #[OA\PathParameter(name: "id", required: true, schema: new OA\Schema(ref: "#/components/schemas/Book/properties/id"))]
+    #[OA\RequestBody(content: new OA\JsonContent(ref: "#/components/schemas/EstimateForm"))]
+    #[OA\Response(response: 200, description: "Success", content: new OA\JsonContent(ref: "#/components/schemas/Book"))]
+    #[OA\Response(response: 404, description: "Book is not found")]
+    #[OA\Response(response: 422, description: "Data Validation Failed", content: new OA\JsonContent(oneOf: [
+        new OA\Schema(ref: "#/components/schemas/ErrorList"),
+        new OA\Schema(ref: "#/components/schemas/Exception"),
+    ]))]
     public function actionRate($id)
     {
         $form = new EstimateForm();

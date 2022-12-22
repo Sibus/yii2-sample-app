@@ -5,14 +5,25 @@ declare(strict_types=1);
 namespace app\forms;
 
 use app\entities\Book;
+use OpenApi\Attributes as OA;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use yii\data\DataProviderInterface;
 
+#[OA\Schema()]
 class SearchForm extends Model
 {
+    #[OA\Property(type: "string", example: "name")]
     public $sort;
+
+    #[OA\Property(type: "string", example: "Улитка на склоне")]
     public $search;
+
+    #[OA\Property(type: "integer", example: 2)]
+    public $page;
+
+    #[OA\Property(type: "integer", example: 50)]
+    public $pageSize;
 
     public function rules(): array
     {

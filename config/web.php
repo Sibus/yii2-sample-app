@@ -54,6 +54,7 @@ $config = [
                 'POST books' => 'book/create',
                 'GET books/<id:\d+>' => 'book/view',
                 'POST books/<id:\d+>/rating' => 'book/rate',
+                'GET openapi.yaml' => 'open-api/document',
             ],
         ],
     ],
@@ -63,7 +64,11 @@ $config = [
         return $behavior;
     },
     'as authFilter' => static function () {
-        return new \app\filters\HttpTokenHeaderAuth('token', env('API_TOKEN'));
+        return new \app\filters\HttpTokenHeaderAuth('token', env('API_TOKEN'), [
+            'except' => [
+                'open-api/document',
+            ],
+        ]);
     },
 ];
 
