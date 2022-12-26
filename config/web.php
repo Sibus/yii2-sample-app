@@ -57,6 +57,9 @@ $config = [
         $behavior->cors['Origin'] = explode(',', env('CORS_ORIGINS', ''));
         return $behavior;
     },
+    'as authFilter' => static function () {
+        return new \app\filters\HttpTokenHeaderAuth('token', env('API_TOKEN'));
+    },
 ];
 
 if (YII_ENV_DEV) {
