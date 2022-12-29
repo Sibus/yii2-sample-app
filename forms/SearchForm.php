@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace app\forms;
 
+use app\data\CustomDataProvider;
 use app\entities\Book;
+use Elastic\Elasticsearch\Client;
 use OpenApi\Attributes as OA;
 use yii\base\Model;
-use yii\data\ActiveDataProvider;
 use yii\data\DataProviderInterface;
+use yii\data\Pagination;
+use yii\data\Sort;
+use yii\helpers\ArrayHelper;
 
 #[OA\Schema()]
 class SearchForm extends Model
@@ -24,6 +28,11 @@ class SearchForm extends Model
 
     #[OA\Property(type: "integer", example: 50)]
     public $pageSize;
+
+    public function __construct(private readonly Client $client, $config = [])
+    {
+        parent::__construct($config);
+    }
 
     public function rules(): array
     {
@@ -43,33 +52,51 @@ class SearchForm extends Model
 
     public function search(): DataProviderInterface
     {
-        $q = Book::find();
-        $dataProvider = new ActiveDataProvider([
-            'query' => $q,
-            'sort' => [
-                'sortParam' => 'sort',
+        $dataProvider = new CustomDataProvider([
+            'query' => Book::find(),
+            'sort' => new Sort([
                 'params' => ['sort' => $this->sort],
                 'defaultOrder' => ['id' => SORT_ASC],
-            ],
-            'pagination' => [
-                'pageParam' => 'page',
-                'pageSizeParam' => 'pageSize',
+            ]),
+            'pagination' => new Pagination([
                 'params' => [
                     'page' => $this->page,
                     'pageSize' => $this->pageSize,
                 ],
-            ],
+            ]),
         ]);
+        $sort = $dataProvider->getSort();
+        $pagination = $dataProvider->getPagination();
+
+        $params = [
+            'index' => 'book',
+            'body' => [
+                '_source' => ['id'],
+                'from' => $pagination->getOffset(),
+                'size' => $pagination->getLimit(),
+                'sort' => array_map(
+                    fn($attribute, $direction) => [$attribute => ($direction === SORT_ASC ? 'asc' : 'desc')],
+                    array_keys($sort->getOrders()),
+                    $sort->getOrders()
+                ),
+            ],
+        ];
 
         if ($this->search) {
-            $q->from([Book::tableName(), 'jsonb_array_elements(genres)']);
-            $q->select(Book::tableName() . '.*');
-            $q->distinct();
-            $q->andWhere(
-                'name ILIKE :search OR author ILIKE :search OR value::text ILIKE :search',
-                ['search' => "%$this->search%"],
-            );
+            $params['body']['query'] = [
+                'bool' => [
+                    'should' => [
+                        ['query_string' => ['default_field' => 'name', 'query' => "*{$this->search}*"]],
+                        ['query_string' => ['default_field' => 'author', 'query' => "*{$this->search}*"]],
+                        ['query_string' => ['default_field' => 'genres', 'query' => "*{$this->search}*"]],
+                    ],
+                ],
+            ];
         }
+
+        $response = $this->client->search($params);
+        $dataProvider->ids = ArrayHelper::getColumn($response['hits']['hits'], '_source.id');
+        $dataProvider->totalCount = $response['hits']['total']['value'];
 
         return $dataProvider;
     }

@@ -42,7 +42,7 @@ class BookController extends Controller
     #[OA\Response(response: 422, description: "Data Validation Failed", content: new OA\JsonContent(ref: "#/components/schemas/ErrorList"))]
     public function actionIndex()
     {
-        $form = new SearchForm();
+        $form = Yii::createObject(SearchForm::class);
         $form->load(Yii::$app->request->get(), '');
         if ($form->validate()) {
             return $form->search();
