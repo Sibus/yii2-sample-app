@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace app\services;
 
+use app\dispatchers\EventDispatcherInterface;
 use app\entities\Book;
 use app\entities\Estimate;
 use app\forms\BookForm;
 use app\forms\EstimateForm;
-use app\services\search\BookIndexer;
 use yii\db\ActiveRecordInterface;
 
 class BookService
 {
-    public function __construct(private readonly BookIndexer $indexer)
+    public function __construct(private readonly EventDispatcherInterface $dispatcher)
     {
     }
 
@@ -21,7 +21,7 @@ class BookService
     {
         $book = Book::create($form->name, $form->author, $form->genres);
         $this->save($book);
-        $this->indexer->index($book);
+        $this->dispatcher->dispatch(new BookCreatedEvent($book));
         return $book;
     }
 
@@ -34,7 +34,7 @@ class BookService
             $book->rating = $this->calculateRating($book->id);
             $this->save($book);
         });
-        $this->indexer->index($book);
+        $this->dispatcher->dispatch(new BookRatedEvent($book));
 
         return $book;
     }
