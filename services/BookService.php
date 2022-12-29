@@ -8,14 +8,20 @@ use app\entities\Book;
 use app\entities\Estimate;
 use app\forms\BookForm;
 use app\forms\EstimateForm;
+use app\services\search\BookIndexer;
 use yii\db\ActiveRecordInterface;
 
 class BookService
 {
+    public function __construct(private readonly BookIndexer $indexer)
+    {
+    }
+
     public function create(BookForm $form): Book
     {
         $book = Book::create($form->name, $form->author, $form->genres);
         $this->save($book);
+        $this->indexer->index($book);
         return $book;
     }
 
@@ -28,6 +34,7 @@ class BookService
             $book->rating = $this->calculateRating($book->id);
             $this->save($book);
         });
+        $this->indexer->index($book);
 
         return $book;
     }
