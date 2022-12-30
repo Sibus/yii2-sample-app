@@ -5,6 +5,7 @@ $config = [
     'basePath' => dirname(__DIR__),
     'bootstrap' => [
         'log',
+        'queue',
         \app\bootstrap\SetUp::class,
     ],
     'controllerNamespace' => 'app\commands',

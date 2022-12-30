@@ -12,6 +12,16 @@ services:
       db:
         condition: service_healthy
 
+  php-queue:
+    image: yiisoftware/yii2-php:8.1-apache
+    volumes:
+      - ~/.composer-docker/cache:/root/.composer/cache:delegated
+      - ./:/app:delegated
+    command: ["php", "yii", "queue/listen", "-v"]
+    depends_on:
+      db:
+        condition: service_healthy
+
   db:
     image: postgres:15.1
     environment:
@@ -28,6 +38,11 @@ services:
       test: /usr/bin/pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}
       interval: 1s
       start_period: 5s
+
+  redis:
+    image: redis:7.0.7
+    ports:
+      - ${REDIS_PORT:-127.0.0.1:6379:6379}
 
   elasticsearch:
     image: elasticsearch:8.5.2
