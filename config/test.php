@@ -1,11 +1,8 @@
 <?php
-$params = require __DIR__ . '/params.php';
-$db = require __DIR__ . '/test_db.php';
 
-/**
- * Application configuration shared by all test types
- */
-return [
+$common = require __DIR__ . '/common.php';
+
+$config = [
     'id' => 'basic-tests',
     'basePath' => dirname(__DIR__),
     'aliases' => [
@@ -14,7 +11,6 @@ return [
     ],
     'language' => 'en-US',
     'components' => [
-        'db' => $db,
         'mailer' => [
             'class' => \yii\symfonymailer\Mailer::class,
             'viewPath' => '@app/mail',
@@ -42,5 +38,6 @@ return [
             */
         ],
     ],
-    'params' => $params,
 ];
+
+return \yii\helpers\ArrayHelper::merge($common, $config);
