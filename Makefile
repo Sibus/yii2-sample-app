@@ -14,7 +14,7 @@ yii/migrate/up:
 	$(call do_exec, php php yii migrate/up --interactive=0)
 
 yii_test/migrate/up:
-	$(call do_exec, php php tests/bin/yii migrate/up --interactive=0)
+	$(call do_exec, php php yii_test migrate/up --interactive=0)
 
 test: yii_test/migrate/up
 	$(call do_exec, php vendor/bin/codecept run)

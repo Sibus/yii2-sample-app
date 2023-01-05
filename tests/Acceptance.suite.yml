@@ -1,0 +1,10 @@
+actor: AcceptanceTester
+modules:
+  enabled:
+    - PhpBrowser:
+        url: "%TEST_URL%"
+    - Yii2:
+        part: orm
+        entryScript: index-test.php
+        cleanup: false
+step_decorators: ~
