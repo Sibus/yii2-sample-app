@@ -13,15 +13,21 @@ $config = [
     ],
     'components' => [
         'request' => [
-            // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
-            'cookieValidationKey' => 'SuZa0rPuH3HKjWod5QnoAVCw6tdpCnTc',
+            'parsers' => [
+                'application/json' => 'yii\web\JsonParser',
+            ],
+            'enableCsrfValidation' => false,
+            'enableCookieValidation' => false,
+        ],
+        'response' => [
+            'format' => \yii\web\Response::FORMAT_JSON,
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],
         'user' => [
             'identityClass' => 'app\models\User',
-            'enableAutoLogin' => true,
+            'enableSession' => false,
         ],
         'mailer' => [
             'class' => \yii\symfonymailer\Mailer::class,
@@ -38,15 +44,19 @@ $config = [
                 ],
             ],
         ],
-        /*
         'urlManager' => [
             'enablePrettyUrl' => true,
+            'enableStrictParsing' => true,
             'showScriptName' => false,
             'rules' => [
             ],
         ],
-        */
     ],
+    'as cors' => static function () {
+        $behavior = new \app\behaviors\Cors();
+        $behavior->cors['Origin'] = explode(',', env('CORS_ORIGINS', ''));
+        return $behavior;
+    },
 ];
 
 if (YII_ENV_DEV) {
